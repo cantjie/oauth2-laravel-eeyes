@@ -12,7 +12,9 @@
   "require":{
     "laravel/framework":"5.5.*"
   },
-  "psr-4":{
+  "autoload":{
+    "psr-4":{
       "Cantjie\\Oauth2":"/src"
+    }
   }
 }
