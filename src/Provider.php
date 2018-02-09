@@ -27,7 +27,7 @@ class Provider{
     /**
      * @var string
      */
-    protected $state;
+    protected $state = null;
 
     /**
      * @var array
@@ -55,7 +55,6 @@ class Provider{
         $this->clientID = env('OAUTH_CLIENT_ID');
         $this->redirectUri = env('OAUTH_CLIENT_URI');
         $this->clientSecret = env('OAUTH_CLIENT_SECRET');
-        $this->state = url()->full();
         foreach ($options as $key => $option){
             $this->{$key} = $option;
         }
@@ -133,6 +132,7 @@ class Provider{
     
     protected function redirectToAuthorizationUrl()
     {
+        $this->state = url()->current();
         $url = $this->buildAuthorizationUrl();
         header('Location: '.$url);
     }

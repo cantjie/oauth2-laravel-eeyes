@@ -10,7 +10,7 @@ class ResourceOwner{
 
     protected $name;
 
-    protected $prePage;
+    protected $prePage = null;
 
     /**
      * ResourceOwner constructor.
