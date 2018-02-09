@@ -1,0 +1,19 @@
+{
+  "name":"cantjie/oauth2-laravel-eeyes",
+  "description":"由于不太会用league/Oauth2client包，自己写一个类似的",
+  "keywords":["oauth2","laravel","cantjie"],
+  "homepage":"https://github.com/cantjie/oauth2-laravel-eeyes",
+  "authors":[
+    {
+      "name":"cantjie",
+      "email":"cantjie@163.com"
+    }
+  ],
+  "require":{
+    "php": ">= 7.*",
+    "laravel/framework":"5.5.*"
+  },
+  "psr-4":{
+      "Cantjie\\Oauth2":"/src"
+  }
+}
