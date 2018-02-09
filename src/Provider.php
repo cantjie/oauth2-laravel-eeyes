@@ -50,13 +50,15 @@ class Provider{
      * Provider constructor.
      * @param $options array
      */
-    public function __construct($options)
+    public function __construct($options = null)
     {
         $this->clientID = env('OAUTH_CLIENT_ID');
         $this->redirectUri = env('OAUTH_CLIENT_URI');
         $this->clientSecret = env('OAUTH_CLIENT_SECRET');
-        foreach ($options as $key => $option){
-            $this->{$key} = $option;
+        if(is_array($options)){
+            foreach ($options as $key => $option){
+                $this->{$key} = $option;
+            }
         }
     }
 
@@ -76,9 +78,10 @@ class Provider{
             if(!isset($user['username'])){ //如果出错了，就重新登录
                 $this->redirectToAuthorizationUrl();
             }else{
-                $user['prePage'] = $this->state;
+                $user['prePage'] = session('oauth2state');
                 $resource_owner = new ResourceOwner($user);
                 session(['oauth2user'=> $resource_owner]);
+                session(['oauth2state'=>null]);
                 return $resource_owner;
             }
         }else{
@@ -88,7 +91,7 @@ class Provider{
     }
 
     protected function checkState(){
-        if($_GET['state'] === $this->state){
+        if($_GET['state'] === session('oauth2state')){
             return true;
         }else{
             return false;
@@ -100,10 +103,10 @@ class Provider{
         $client = new \GuzzleHttp\Client(['base_uri'=>'https://account.eeyes.net/api/user']);
 
         $response = $client->request('GET','',[
-           'headers' => [
-               'Accept' => 'application/json',
-               'Authorization' => 'Bearer '. $token['access_token'],
-           ]
+            'headers' => [
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer '. $token['access_token'],
+            ]
         ]);
 
         return json_decode((string)$response->getBody(),true);
@@ -129,10 +132,11 @@ class Provider{
 
         return json_decode((string)$response->getBody(),true);
     }
-    
+
     protected function redirectToAuthorizationUrl()
     {
         $this->state = url()->current();
+        session(['oauth2state'=> url()->current()]);
         $url = $this->buildAuthorizationUrl();
         header('Location: '.$url);
     }
@@ -154,5 +158,15 @@ class Provider{
         return implode($this->scopeSeparator,$this->scope);
     }
 
+    public static function logout()
+    {
+//        session([
+//            'oauth2state'=>null,
+//            'oauth2user'=>null,
+//        ]);
+        session()->flush();
+        session()->save();
+        redirect('https://cas.xjtu.edu.cn/logout');
+    }
 
 }
