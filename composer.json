@@ -10,7 +10,6 @@
     }
   ],
   "require":{
-    "php": ">= 7.*",
     "laravel/framework":"5.5.*"
   },
   "psr-4":{
