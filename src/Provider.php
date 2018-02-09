@@ -55,6 +55,7 @@ class Provider{
         $this->clientID = env('OAUTH_CLIENT_ID');
         $this->redirectUri = env('OAUTH_CLIENT_URI');
         $this->clientSecret = env('OAUTH_CLIENT_SECRET');
+        $this->state = url()->current();
         if(is_array($options)){
             foreach ($options as $key => $option){
                 $this->{$key} = $option;
@@ -80,8 +81,8 @@ class Provider{
             }else{
                 $user['prePage'] = session('oauth2state');
                 $resource_owner = new ResourceOwner($user);
-                session(['oauth2user'=> $resource_owner]);
-                session(['oauth2state'=>null]);
+                session(['oauth2user' => $resource_owner]);
+                session(['oauth2state' => null]);
                 return $resource_owner;
             }
         }else{
@@ -135,9 +136,9 @@ class Provider{
 
     protected function redirectToAuthorizationUrl()
     {
-        $this->state = url()->current();
-        session(['oauth2state'=> url()->current()]);
+        session(['oauth2state'=> $this->state]);
         $url = $this->buildAuthorizationUrl();
+        session()->save();
         header('Location: '.$url);
     }
 
@@ -169,4 +170,8 @@ class Provider{
         redirect('https://cas.xjtu.edu.cn/logout');
     }
 
+    public static function getResourceOwnerFromSession()
+    {
+        return session('oauth2user');
+    }
 }
