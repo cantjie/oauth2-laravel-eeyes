@@ -63,7 +63,11 @@ class Provider{
         }
     }
 
-
+    /**
+     * only for web develop, not for api
+     *
+     * @return ResourceOwner|\Illuminate\Session\SessionManager|\Illuminate\Session\Store|mixed|null
+     */
     public function getResourceOwner()
     {
         if(session('oauth2user')){
@@ -74,7 +78,7 @@ class Provider{
             }
 
             $token = $this->getAccessToken($_GET['code']);
-            $user = $this->createResourceOwner($token);
+            $user = static::createResourceOwnerArray($token);
 
             if(!isset($user['username'])){ //如果出错了，就重新登录
                 $this->redirectToAuthorizationUrl();
@@ -91,7 +95,7 @@ class Provider{
 
     }
 
-    protected function checkState(){
+    public function checkState(){
         if($_GET['state'] === session('oauth2state')){
             return true;
         }else{
@@ -99,14 +103,44 @@ class Provider{
         }
     }
 
-    protected function createResourceOwner($token)
+    /**
+     * @param $refresh_token string
+     * @return array
+     */
+    public function refreshToken($refresh_token)
+    {
+        $client = new \GuzzleHttp\Client();
+
+        $response = $client->post('https://account.eeyes.net/oauth/token',[
+            'form_params' => [
+                'grant_type' => 'refresh_token',
+                'refresh_token' => $refresh_token,
+                'client_id' => $this->clientID,
+                'client_secret' => $this->clientSecret,
+                'scope' => $this->getDefaultScopes(),
+            ]
+        ]);
+
+        return json_decode((string)$response->getBody(),true);
+
+    }
+
+    /**
+     * @param array|string $token
+     * @return array
+     */
+    public static function createResourceOwnerArray($token)
     {
         $client = new \GuzzleHttp\Client(['base_uri'=>'https://account.eeyes.net/api/user']);
+
+        if(is_array($token)){
+            $token = $token['access_token'];
+        }
 
         $response = $client->request('GET','',[
             'headers' => [
                 'Accept' => 'application/json',
-                'Authorization' => 'Bearer '. $token['access_token'],
+                'Authorization' => 'Bearer '. $token,
             ]
         ]);
 
@@ -117,7 +151,7 @@ class Provider{
      * @param $code string
      * @return array
      */
-    protected function getAccessToken($code)
+    public function getAccessToken($code)
     {
         $http = new \GuzzleHttp\Client();
 
@@ -134,11 +168,10 @@ class Provider{
         return json_decode((string)$response->getBody(),true);
     }
 
-    protected function redirectToAuthorizationUrl()
+    public function redirectToAuthorizationUrl()
     {
         session(['oauth2state'=> $this->state]);
         $url = $this->buildAuthorizationUrl();
-        session()->save();
         header('Location: '.$url);
     }
 
