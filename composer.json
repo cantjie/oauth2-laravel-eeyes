@@ -16,5 +16,12 @@
     "psr-4":{
       "Cantjie\\Oauth2\\":"/src"
     }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Cantjie\\Oauth2\\OAuthServiceProvider"
+      ]
+    }
   }
 }

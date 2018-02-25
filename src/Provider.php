@@ -52,15 +52,18 @@ class Provider{
      */
     public function __construct($options = null)
     {
-        $this->clientID = env('OAUTH_CLIENT_ID');
-        $this->redirectUri = env('OAUTH_CLIENT_URI');
-        $this->clientSecret = env('OAUTH_CLIENT_SECRET');
-        $this->state = url()->current();
-        if(is_array($options)){
-            foreach ($options as $key => $option){
-                $this->{$key} = $option;
-            }
-        }
+        $default = [
+            'OAUTH_CLIENT_ID' => config('oauth.client.id'),
+            'OAUTH_CLIENT_URI' => config('oauth.redirect_uri'),
+            'OAUTH_CLIENT_SECRET' => config('oauth.client.secret'),
+            'state' => url()->current(),
+        ];
+        $options = array_merge($default,$options);
+
+        $this->clientID = $options['OAUTH_CLIENT_ID'];
+        $this->redirectUri = $options['OAUTH_CLIENT_URI'];
+        $this->clientSecret = $options['OAUTH_CLIENT_SECRET'];
+        $this->state = $options['state'];
     }
 
     /**
