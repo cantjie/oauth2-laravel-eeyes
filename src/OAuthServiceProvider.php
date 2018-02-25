@@ -3,7 +3,7 @@ namespace Cantjie\Oauth2;
 
 use Illuminate\Support\ServiceProvider;
 
-class CasServiceProvider extends ServiceProvider
+class OAuthServiceProvider extends ServiceProvider
 {
 
     /**
